@@ -150,7 +150,7 @@ export function Board({
             fontWeight={800}
             fill={SIDE_COLOR[p.side]}
           >
-            {pieceLabel(p.type)}
+            {pieceLabel(p.type, p.side)}
           </text>
         </g>
       ))}
