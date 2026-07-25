@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { signOut } from "@/app/actions/auth"
 
 export function Header() {
   return (
@@ -18,11 +17,6 @@ export function Header() {
           통계
         </Link>
       </nav>
-      <form action={signOut}>
-        <button type="submit" className="text-sm text-neutral-500 underline underline-offset-2">
-          로그아웃
-        </button>
-      </form>
     </header>
   )
 }
