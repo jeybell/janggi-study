@@ -6,18 +6,25 @@ export function formatCoord(c: Coord): string {
   return `${c.file}${c.rank}`
 }
 
+// 장기 기물은 한자로 표기한다. 궁(장군)과 졸/병은 진영에 따라 글자가 다르다
+// (초: 楚/卒, 한: 漢/兵). 나머지 기물은 양 진영이 같은 글자를 쓴다.
 const PIECE_LABEL: Record<PieceType, string> = {
-  GENERAL: "궁",
-  GUARD: "사",
-  CHARIOT: "차",
-  CANNON: "포",
-  HORSE: "마",
-  ELEPHANT: "상",
-  SOLDIER: "졸",
+  GENERAL: "將",
+  GUARD: "士",
+  CHARIOT: "車",
+  CANNON: "包",
+  HORSE: "馬",
+  ELEPHANT: "象",
+  SOLDIER: "卒",
 }
 
-export function pieceLabel(type: PieceType): string {
-  return PIECE_LABEL[type]
+const SIDE_PIECE_LABEL: Partial<Record<Side, Partial<Record<PieceType, string>>>> = {
+  CHO: { GENERAL: "楚", SOLDIER: "卒" },
+  HAN: { GENERAL: "漢", SOLDIER: "兵" },
+}
+
+export function pieceLabel(type: PieceType, side: Side): string {
+  return SIDE_PIECE_LABEL[side]?.[type] ?? PIECE_LABEL[type]
 }
 
 export function sideLabel(side: Side): string {

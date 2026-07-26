@@ -29,18 +29,9 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/login")
-
-  if (!user && !isAuthRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/login"
-    return NextResponse.redirect(url)
-  }
-
-  if (user && isAuthRoute) {
-    const url = request.nextUrl.clone()
-    url.pathname = "/games"
-    return NextResponse.redirect(url)
+  // 로그인 화면 없이 조용히 익명 세션을 발급해 games 테이블의 RLS(user_id 소유권)를 그대로 활용한다.
+  if (!user) {
+    await supabase.auth.signInAnonymously()
   }
 
   return response
