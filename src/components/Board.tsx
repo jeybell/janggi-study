@@ -1,5 +1,6 @@
 "use client"
 
+import { pieceFont } from "@/lib/font"
 import { pieceLabel } from "@/lib/notation"
 import type { Coord, Piece } from "@/lib/types"
 
@@ -145,9 +146,9 @@ export function Board({
           <text
             textAnchor="middle"
             dominantBaseline="central"
-            dy="1"
-            fontSize={24}
-            fontWeight={800}
+            dy="3"
+            fontSize={34}
+            className={pieceFont.className}
             fill={SIDE_COLOR[p.side]}
           >
             {pieceLabel(p.type, p.side)}
