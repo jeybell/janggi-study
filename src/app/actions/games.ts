@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation"
 import { createClient } from "@/lib/supabase/server"
 import { collectTags } from "@/lib/moveTree"
-import type { GameContent, GameMeta, GameResult, SetupType } from "@/lib/types"
+import type { GameContent, GameMeta, SetupType } from "@/lib/types"
 
 export type CreateGameState = { error: string | null }
 
@@ -23,7 +23,7 @@ export async function createGame(
       cho: String(formData.get("setupCho") ?? "MSMS") as SetupType,
       han: String(formData.get("setupHan") ?? "MSMS") as SetupType,
     },
-    result: String(formData.get("result") ?? "UNKNOWN") as GameResult,
+    result: "UNKNOWN",
   }
 
   const playedAt = String(formData.get("playedAt") ?? "")

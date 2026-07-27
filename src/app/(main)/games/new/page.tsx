@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 import { createGame, type CreateGameState } from "@/app/actions/games"
-import { RESULT_OPTIONS, SETUP_TYPES } from "@/lib/types"
+import { SETUP_TYPES } from "@/lib/types"
 
 const initialState: CreateGameState = { error: null }
 
@@ -22,10 +22,16 @@ export default function NewGamePage() {
       <h1 className="mb-6 text-lg font-semibold">대국 추가</h1>
 
       <form action={formAction} className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1 text-sm">
-          제목
-          <input name="title" placeholder="예: OO 프로 해설 영상" className="rounded border border-neutral-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900" />
-        </label>
+        <div className="grid grid-cols-2 gap-4">
+          <label className="flex flex-col gap-1 text-sm">
+            제목
+            <input name="title" placeholder="예: OO 프로 해설 영상" className="rounded border border-neutral-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900" />
+          </label>
+          <label className="flex flex-col gap-1 text-sm">
+            일자
+            <input type="date" name="playedAt" defaultValue={todayLocal()} className="rounded border border-neutral-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900" />
+          </label>
+        </div>
 
         <div className="grid grid-cols-2 gap-4">
           <label className="flex flex-col gap-1 text-sm">
@@ -44,23 +50,6 @@ export default function NewGamePage() {
               {SETUP_TYPES.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <label className="flex flex-col gap-1 text-sm">
-            일자
-            <input type="date" name="playedAt" defaultValue={todayLocal()} className="rounded border border-neutral-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900" />
-          </label>
-          <label className="flex flex-col gap-1 text-sm">
-            결과
-            <select name="result" defaultValue="UNKNOWN" className="rounded border border-neutral-300 px-2 py-1.5 dark:border-neutral-700 dark:bg-neutral-900">
-              {RESULT_OPTIONS.map((r) => (
-                <option key={r.value} value={r.value}>
-                  {r.label}
                 </option>
               ))}
             </select>
