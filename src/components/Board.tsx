@@ -1,6 +1,6 @@
 "use client"
 
-import { pieceLabel } from "@/lib/notation"
+import { pieceLabel, sideLabel } from "@/lib/notation"
 import type { Coord, Piece } from "@/lib/types"
 
 const FILES = 9
@@ -9,7 +9,7 @@ const CELL = 64
 const PAD = 44
 const WIDTH = (FILES - 1) * CELL + PAD * 2
 const HEIGHT = (RANKS - 1) * CELL + PAD * 2
-const PIECE_R = 25
+const PIECE_SIZE = 58
 
 function x(file: number): number {
   return PAD + (file - 1) * CELL
@@ -18,19 +18,14 @@ function y(rank: number): number {
   return PAD + (rank - 1) * CELL
 }
 
-// 팔각형(스톱사인 모양) 말 토큰 좌표
-function octagonPoints(r: number): string {
-  return Array.from({ length: 8 }, (_, i) => {
-    const angle = ((22.5 + i * 45) * Math.PI) / 180
-    return `${(r * Math.cos(angle)).toFixed(2)},${(r * Math.sin(angle)).toFixed(2)}`
-  }).join(" ")
-}
-
-const SIDE_COLOR = { CHO: "#1e3a8a", HAN: "#991b1b" } as const
 const LINE_COLOR = "#5b4632"
 
 function samePoint(a: Coord | null | undefined, b: Coord): boolean {
   return !!a && a.file === b.file && a.rank === b.rank
+}
+
+function pieceImageSrc(p: Piece): string {
+  return `/pieces/${p.side.toLowerCase()}_${p.type.toLowerCase()}.png`
 }
 
 export function Board({
@@ -71,11 +66,6 @@ export function Board({
             values="0 0 0 0 0.36  0 0 0 0 0.24  0 0 0 0 0.1  0 0 0 0.45 0"
           />
         </filter>
-        <radialGradient id="pieceFace" cx="35%" cy="30%" r="75%">
-          <stop offset="0%" stopColor="#fffdf8" />
-          <stop offset="65%" stopColor="#eee7d8" />
-          <stop offset="100%" stopColor="#b9ab8d" />
-        </radialGradient>
         <filter id="pieceShadow" x="-50%" y="-50%" width="200%" height="200%">
           <feDropShadow dx="0" dy="1.5" stdDeviation="1.3" floodColor="#000000" floodOpacity="0.4" />
         </filter>
@@ -108,13 +98,13 @@ export function Board({
       {lastMove && (
         <>
           <circle cx={x(lastMove.from.file)} cy={y(lastMove.from.rank)} r={11} className="fill-yellow-300/50" />
-          <circle cx={x(lastMove.to.file)} cy={y(lastMove.to.rank)} r={PIECE_R + 4} className="fill-none stroke-yellow-500" strokeWidth={2.5} />
+          <circle cx={x(lastMove.to.file)} cy={y(lastMove.to.rank)} r={PIECE_SIZE / 2 + 4} className="fill-none stroke-yellow-500" strokeWidth={2.5} />
         </>
       )}
 
       {/* 선택 강조 */}
       {selected && (
-        <circle cx={x(selected.file)} cy={y(selected.rank)} r={PIECE_R + 6} className="fill-none stroke-emerald-500" strokeWidth={2.5} />
+        <circle cx={x(selected.file)} cy={y(selected.rank)} r={PIECE_SIZE / 2 + 6} className="fill-none stroke-emerald-500" strokeWidth={2.5} />
       )}
 
       {/* 클릭 영역 */}
@@ -132,27 +122,18 @@ export function Board({
 
       {/* 기물 */}
       {pieces.map((p) => (
-        <g key={p.id} transform={`translate(${x(p.coord.file)}, ${y(p.coord.rank)})`} className="pointer-events-none">
-          <g filter="url(#pieceShadow)">
-            <polygon
-              points={octagonPoints(PIECE_R)}
-              fill="url(#pieceFace)"
-              stroke={samePoint(selected, p.coord) ? SIDE_COLOR[p.side] : "#8a8172"}
-              strokeWidth={samePoint(selected, p.coord) ? 3 : 1.5}
-            />
-            <polygon points={octagonPoints(PIECE_R - 3)} fill="none" stroke="#ffffff" strokeOpacity={0.6} strokeWidth={1} />
-          </g>
-          <text
-            textAnchor="middle"
-            dominantBaseline="central"
-            dy="1"
-            fontSize={24}
-            fontWeight={800}
-            fill={SIDE_COLOR[p.side]}
-          >
-            {pieceLabel(p.type, p.side)}
-          </text>
-        </g>
+        <image
+          key={p.id}
+          href={pieceImageSrc(p)}
+          x={x(p.coord.file) - PIECE_SIZE / 2}
+          y={y(p.coord.rank) - PIECE_SIZE / 2}
+          width={PIECE_SIZE}
+          height={PIECE_SIZE}
+          filter={samePoint(selected, p.coord) ? undefined : "url(#pieceShadow)"}
+          className="pointer-events-none"
+        >
+          <title>{`${sideLabel(p.side)} ${pieceLabel(p.type, p.side)}`}</title>
+        </image>
       ))}
     </svg>
   )
