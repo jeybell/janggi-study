@@ -179,10 +179,8 @@ export function GameEditor({ gameId, initialContent }: { gameId: string; initial
       <div className="flex flex-1 flex-col gap-4">
         <section className="rounded border border-neutral-200 p-3 text-sm dark:border-neutral-800">
           <div className="flex flex-wrap gap-x-4 gap-y-1">
-            <span>초: {content.meta.players.cho || "?"}</span>
-            <span>한: {content.meta.players.han || "?"}</span>
+            <span className="font-medium">{content.meta.title || "(제목 없음)"}</span>
             <span>결과: {RESULT_OPTIONS.find((r) => r.value === content.meta.result)?.label}</span>
-            {content.meta.source && <span>출처: {content.meta.source}</span>}
           </div>
         </section>
 

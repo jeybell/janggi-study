@@ -7,7 +7,7 @@ type Row = { id: string; content: GameContent; tags: string[]; played_at: string
 export default async function GamesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tag?: string; player?: string; playedAt?: string }>
+  searchParams: Promise<{ tag?: string; title?: string; playedAt?: string }>
 }) {
   const sp = await searchParams
   const supabase = await createClient()
@@ -20,10 +20,7 @@ export default async function GamesPage({
 
   if (sp.tag) query = query.contains("tags", [sp.tag])
   if (sp.playedAt) query = query.eq("played_at", sp.playedAt)
-  if (sp.player) {
-    const q = `%${sp.player}%`
-    query = query.or(`content->meta->players->>cho.ilike.${q},content->meta->players->>han.ilike.${q}`)
-  }
+  if (sp.title) query = query.ilike("content->meta->>title", `%${sp.title}%`)
 
   const { data, error } = await query
   const games = (data ?? []) as Row[]
@@ -39,8 +36,8 @@ export default async function GamesPage({
 
       <form method="get" className="mb-4 flex flex-wrap items-end gap-3 rounded border border-neutral-200 p-3 text-sm dark:border-neutral-800">
         <label className="flex flex-col gap-1">
-          대국자
-          <input name="player" defaultValue={sp.player ?? ""} className="rounded border border-neutral-300 px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900" />
+          제목
+          <input name="title" defaultValue={sp.title ?? ""} className="rounded border border-neutral-300 px-2 py-1 dark:border-neutral-700 dark:bg-neutral-900" />
         </label>
         <label className="flex flex-col gap-1">
           일자
@@ -60,7 +57,7 @@ export default async function GamesPage({
         <button type="submit" className="rounded border px-3 py-1.5 dark:border-neutral-700">
           검색
         </button>
-        {(sp.player || sp.playedAt || sp.tag) && (
+        {(sp.title || sp.playedAt || sp.tag) && (
           <Link href="/games" className="text-neutral-500 underline underline-offset-2">
             초기화
           </Link>
@@ -80,9 +77,7 @@ export default async function GamesPage({
                 className="flex flex-col gap-1 rounded border border-neutral-200 p-3 hover:bg-neutral-50 dark:border-neutral-800 dark:hover:bg-neutral-900"
               >
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium">
-                    {g.content.meta.players.cho || "?"} (초) vs {g.content.meta.players.han || "?"} (한)
-                  </span>
+                  <span className="font-medium">{g.content.meta.title || "(제목 없음)"}</span>
                   <span className="text-neutral-500">{g.played_at ?? ""}</span>
                 </div>
                 <div className="flex flex-wrap items-center gap-2 text-xs text-neutral-500">

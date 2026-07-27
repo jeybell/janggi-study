@@ -40,7 +40,7 @@ export default async function StatsPage() {
   const branchRows = games
     .map((g) => ({
       id: g.id,
-      label: `${g.content.meta.players.cho || "?"} vs ${g.content.meta.players.han || "?"}`,
+      label: g.content.meta.title || "(제목 없음)",
       branches: countBranchPoints(g.content.moves),
       moves: countMoves(g.content.moves),
     }))

@@ -18,16 +18,12 @@ export async function createGame(
   if (!user) return { error: "로그인이 필요합니다." }
 
   const meta: GameMeta = {
-    players: {
-      cho: String(formData.get("playersCho") ?? ""),
-      han: String(formData.get("playersHan") ?? ""),
-    },
+    title: String(formData.get("title") ?? ""),
     setup: {
       cho: String(formData.get("setupCho") ?? "MSMS") as SetupType,
       han: String(formData.get("setupHan") ?? "MSMS") as SetupType,
     },
     result: String(formData.get("result") ?? "UNKNOWN") as GameResult,
-    source: String(formData.get("source") ?? ""),
   }
 
   const playedAt = String(formData.get("playedAt") ?? "")

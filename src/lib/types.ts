@@ -30,10 +30,9 @@ export type SetupType = "MSMS" | "SMSM" | "MSSM" | "SMMS"
 export type GameResult = "CHO_WIN" | "HAN_WIN" | "DRAW" | "UNKNOWN"
 
 export type GameMeta = {
-  players: { cho: string; han: string }
+  title: string
   setup: { cho: SetupType; han: SetupType }
   result: GameResult
-  source: string
 }
 
 export type MoveNode = {
