@@ -7,8 +7,13 @@ import { saveGameContent } from "@/app/actions/games"
 import { pieceAt, piecesAtPath } from "@/lib/board"
 import { addMove, deleteNode, findNode, getPath, updateNode } from "@/lib/moveTree"
 import { formatMove, sideLabel } from "@/lib/notation"
+import { checkStatus, legalDestinations, sideToMove } from "@/lib/rules"
 import { RESULT_OPTIONS, SUGGESTED_TAGS } from "@/lib/types"
 import type { Coord, GameContent } from "@/lib/types"
+
+function sameCoord(a: Coord | null, b: Coord): boolean {
+  return !!a && a.file === b.file && a.rank === b.rank
+}
 
 export function GameEditor({ gameId, initialContent }: { gameId: string; initialContent: GameContent }) {
   const [content, setContent] = useState<GameContent>(initialContent)
@@ -18,6 +23,7 @@ export function GameEditor({ gameId, initialContent }: { gameId: string; initial
   const [isSaving, startSaving] = useTransition()
   const [saveError, setSaveError] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState("")
+  const [illegalHint, setIllegalHint] = useState(false)
 
   const path = useMemo(() => getPath(content.moves, currentId), [content.moves, currentId])
   const pieces = useMemo(() => piecesAtPath(content.meta.setup, path), [content.meta.setup, path])
@@ -25,31 +31,46 @@ export function GameEditor({ gameId, initialContent }: { gameId: string; initial
   const nextOptions = currentNode ? currentNode.children : content.moves
   const lastMove = currentNode ? { from: currentNode.from, to: currentNode.to } : null
 
+  const turn = useMemo(() => sideToMove(path.length), [path.length])
+  const status = useMemo(() => checkStatus(turn, pieces), [turn, pieces])
+  const legalTargets = useMemo(() => {
+    const piece = pendingFrom ? pieceAt(pieces, pendingFrom) : undefined
+    return piece ? legalDestinations(piece, pieces) : []
+  }, [pendingFrom, pieces])
+
   function mutate(next: GameContent) {
     setContent(next)
     setDirty(true)
   }
 
   function handleIntersectionClick(c: Coord) {
+    setIllegalHint(false)
+
     if (!pendingFrom) {
       const piece = pieceAt(pieces, c)
-      if (!piece) return
+      if (!piece || piece.side !== turn) return
       setPendingFrom(c)
       return
     }
 
-    if (pendingFrom.file === c.file && pendingFrom.rank === c.rank) {
+    if (sameCoord(pendingFrom, c)) {
       setPendingFrom(null)
       return
     }
 
-    const moving = pieceAt(pieces, pendingFrom)
-    if (!moving) {
-      setPendingFrom(null)
+    // 같은 편 다른 기물을 클릭하면 선택을 그 기물로 옮긴다
+    const clickedPiece = pieceAt(pieces, c)
+    if (clickedPiece && clickedPiece.side === turn) {
+      setPendingFrom(c)
       return
     }
 
-    const { tree, id } = addMove(content.moves, currentId, { side: moving.side, from: pendingFrom, to: c })
+    if (!legalTargets.some((t) => sameCoord(c, t))) {
+      setIllegalHint(true)
+      return
+    }
+
+    const { tree, id } = addMove(content.moves, currentId, { side: turn, from: pendingFrom, to: c })
     mutate({ ...content, moves: tree })
     setCurrentId(id)
     setPendingFrom(null)
@@ -101,7 +122,13 @@ export function GameEditor({ gameId, initialContent }: { gameId: string; initial
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6 md:flex-row">
       <div className="md:w-[420px]">
-        <Board pieces={pieces} selected={pendingFrom} lastMove={lastMove} onIntersectionClick={handleIntersectionClick} />
+        <Board
+          pieces={pieces}
+          selected={pendingFrom}
+          legalTargets={legalTargets}
+          lastMove={lastMove}
+          onIntersectionClick={handleIntersectionClick}
+        />
 
         <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
           <button type="button" onClick={() => setCurrentId(null)} disabled={path.length === 0} className="rounded border px-2 py-1 text-sm disabled:opacity-40 dark:border-neutral-700">
@@ -140,8 +167,13 @@ export function GameEditor({ gameId, initialContent }: { gameId: string; initial
         </div>
 
         <p className="mt-2 text-center text-xs text-neutral-500">
+          {sideLabel(turn)} 차례
+          {status === "CHECK" && <span className="ml-1 font-semibold text-red-600">— 장군!</span>}
+          {status === "CHECKMATE" && <span className="ml-1 font-semibold text-red-600">— 외통(더 이상 둘 수 없음)</span>}
+          {" · "}
           {pendingFrom ? "이동할 위치를 클릭하세요" : "이동할 기물을 클릭하세요"}
         </p>
+        {illegalHint && <p className="mt-1 text-center text-xs text-red-600">그 위치로는 이동할 수 없습니다.</p>}
       </div>
 
       <div className="flex flex-1 flex-col gap-4">
