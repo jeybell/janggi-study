@@ -4,6 +4,8 @@ import type { Coord, File, Piece, PieceType, Side, SetupType } from "./types"
 const BACK_RANK: Record<Side, number> = { HAN: 1, CHO: 10 }
 const CANNON_RANK: Record<Side, number> = { HAN: 3, CHO: 8 }
 const SOLDIER_RANK: Record<Side, number> = { HAN: 4, CHO: 7 }
+// 궁은 뒷줄이 아니라 궁성 중앙(뒷줄에서 상대 쪽으로 한 칸)에서 시작한다.
+const GENERAL_RANK: Record<Side, number> = { HAN: 2, CHO: 9 }
 
 // 마상마상 / 상마상마 / 마상상마 / 상마마상: file 2,3 과 7,8 자리의 마(HORSE)/상(ELEPHANT) 배치
 const SETUP_KNIGHT_ELEPHANT: Record<SetupType, [PieceType, PieceType, PieceType, PieceType]> = {
@@ -35,7 +37,7 @@ export function initialPieces(setup: { cho: SetupType; han: SetupType }): Piece[
       { id: nextId(), side, type: f2, coord: coord(2, back) },
       { id: nextId(), side, type: f3, coord: coord(3, back) },
       { id: nextId(), side, type: "GUARD", coord: coord(4, back) },
-      { id: nextId(), side, type: "GENERAL", coord: coord(5, back) },
+      { id: nextId(), side, type: "GENERAL", coord: coord(5, GENERAL_RANK[side]) },
       { id: nextId(), side, type: "GUARD", coord: coord(6, back) },
       { id: nextId(), side, type: f7, coord: coord(7, back) },
       { id: nextId(), side, type: f8, coord: coord(8, back) },

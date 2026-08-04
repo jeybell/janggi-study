@@ -1,5 +1,6 @@
 "use client"
 
+import { pieceAt } from "@/lib/board"
 import { pieceLabel, sideLabel } from "@/lib/notation"
 import type { Coord, Piece } from "@/lib/types"
 
@@ -31,11 +32,13 @@ function pieceImageSrc(p: Piece): string {
 export function Board({
   pieces,
   selected = null,
+  legalTargets = [],
   lastMove = null,
   onIntersectionClick,
 }: {
   pieces: Piece[]
   selected?: Coord | null
+  legalTargets?: Coord[]
   lastMove?: { from: Coord; to: Coord } | null
   onIntersectionClick?: (c: Coord) => void
 }) {
@@ -106,6 +109,18 @@ export function Board({
       {selected && (
         <circle cx={x(selected.file)} cy={y(selected.rank)} r={PIECE_SIZE / 2 + 6} className="fill-none stroke-emerald-500" strokeWidth={2.5} />
       )}
+
+      {/* 합법수 표시 */}
+      {legalTargets.map((t) => (
+        <circle
+          key={`legal${t.file}-${t.rank}`}
+          cx={x(t.file)}
+          cy={y(t.rank)}
+          r={pieceAt(pieces, t) ? PIECE_SIZE / 2 + 3 : 8}
+          className={pieceAt(pieces, t) ? "fill-none stroke-emerald-500/70" : "fill-emerald-500/50"}
+          strokeWidth={2.5}
+        />
+      ))}
 
       {/* 클릭 영역 */}
       {points.map((c) => (
